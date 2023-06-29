@@ -221,6 +221,7 @@ if (supportsMutation) {
     // children to find all the terminal nodes.
     let node = workInProgress.child;
     while (node !== null) {
+      // 原生标签 || 文本
       if (node.tag === HostComponent || node.tag === HostText) {
         appendInitialChild(parent, node.stateNode);
       } else if (node.tag === HostPortal) {
@@ -232,9 +233,12 @@ if (supportsMutation) {
         node = node.child;
         continue;
       }
+
+      // 递归终止条件
       if (node === workInProgress) {
         return;
       }
+      // 判断有没有兄弟节点
       while (node.sibling === null) {
         if (node.return === null || node.return === workInProgress) {
           return;
@@ -639,6 +643,7 @@ function cutOffTailIfNeeded(
   }
 }
 
+// 冒泡 flags
 function bubbleProperties(completedWork: Fiber) {
   const didBailout =
     completedWork.alternate !== null &&
@@ -958,8 +963,10 @@ function completeWork(
     }
     case HostComponent: {
       popHostContext(workInProgress);
+      // 获取 root 挂载到的真实 dom
       const rootContainerInstance = getRootHostContainer();
       const type = workInProgress.type;
+      // update
       if (current !== null && workInProgress.stateNode != null) {
         updateHostComponent(
           current,
@@ -972,7 +979,9 @@ function completeWork(
         if (current.ref !== workInProgress.ref) {
           markRef(workInProgress);
         }
-      } else {
+      }
+      // mount
+      else {
         if (!newProps) {
           if (workInProgress.stateNode === null) {
             throw new Error(
@@ -1015,6 +1024,7 @@ function completeWork(
             workInProgress,
           );
 
+          // 插入
           appendAllChildren(instance, workInProgress, false, false);
 
           workInProgress.stateNode = instance;

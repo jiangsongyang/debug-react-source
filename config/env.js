@@ -97,8 +97,8 @@ function getClientEnvironment(publicUrl) {
       return env;
     }, {}),
     __DEV__: true,
-    __EXPERIMENTAL__: true,
-    __PROFILE__: true,
+    __EXPERIMENTAL__: false,
+    __PROFILE__: false,
   };
 
   return { raw, stringified };

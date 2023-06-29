@@ -244,6 +244,7 @@ function findHostInstanceWithWarning(
   return findHostInstance(component);
 }
 
+// reactDom.createRoot 创建实例的方法入口
 export function createContainer(
   containerInfo: Container,
   tag: RootTag,
@@ -327,6 +328,7 @@ export function updateContainer(
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
+  // 拿到 rootFiber
   const current = container.current;
   const eventTime = requestEventTime();
   const lane = requestUpdateLane(current);
@@ -359,6 +361,7 @@ export function updateContainer(
     }
   }
 
+  // 创建更新 准备消费 reactElement
   const update = createUpdate(eventTime, lane);
   // Caution: React DevTools currently depends on this property
   // being called "element".
@@ -378,6 +381,7 @@ export function updateContainer(
     update.callback = callback;
   }
 
+  // fiberRootNode
   const root = enqueueUpdate(current, update, lane);
   if (root !== null) {
     scheduleUpdateOnFiber(root, current, lane, eventTime);

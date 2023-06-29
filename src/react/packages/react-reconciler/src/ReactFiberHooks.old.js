@@ -370,6 +370,7 @@ function areHookInputsEqual(
   return true;
 }
 
+// 函数组件执行入口
 export function renderWithHooks<Props, SecondArg>(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -379,6 +380,8 @@ export function renderWithHooks<Props, SecondArg>(
   nextRenderLanes: Lanes,
 ): any {
   renderLanes = nextRenderLanes;
+
+  // 设置全局变量 标记当前工作的fiber 是那个
   currentlyRenderingFiber = workInProgress;
 
   if (__DEV__) {
@@ -424,12 +427,15 @@ export function renderWithHooks<Props, SecondArg>(
       ReactCurrentDispatcher.current = HooksDispatcherOnMountInDEV;
     }
   } else {
+
+    // 挂载 hooks
     ReactCurrentDispatcher.current =
       current === null || current.memoizedState === null
         ? HooksDispatcherOnMount
         : HooksDispatcherOnUpdate;
   }
 
+  // 执行组件 拿到组件的 return 的 reactElement
   let children = Component(props, secondArg);
 
   // Check if there was a render phase update
@@ -476,6 +482,7 @@ export function renderWithHooks<Props, SecondArg>(
 
   // We can assume the previous dispatcher is always this one, since we set it
   // at the beginning of the render phase and there's no re-entrance.
+  // 组件执行结束 将 dispatcher 重置成调用会抛出异常的状态
   ReactCurrentDispatcher.current = ContextOnlyDispatcher;
 
   if (__DEV__) {
@@ -531,6 +538,7 @@ export function renderWithHooks<Props, SecondArg>(
     );
   }
 
+  // 当前版本功能未开启
   if (enableLazyContextPropagation) {
     if (current !== null) {
       if (!checkIfWorkInProgressReceivedUpdate()) {

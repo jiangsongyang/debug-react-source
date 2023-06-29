@@ -262,6 +262,10 @@ function resolveLazy(lazyType) {
 // to be able to optimize each path individually by branching early. This needs
 // a compiler or we can do it manually. Helpers that don't need this branching
 // live outside of this function.
+
+// 如果为 false 则表示 不需要追踪副作用 不会标记多余的 placement 等 effect
+// mount 阶段是 false 只需要 placement 一次
+// update 阶段是 true 需要 dfs 比较
 function ChildReconciler(shouldTrackSideEffects) {
   function deleteChild(returnFiber: Fiber, childToDelete: Fiber): void {
     if (!shouldTrackSideEffects) {
@@ -359,6 +363,9 @@ function ChildReconciler(shouldTrackSideEffects) {
   function placeSingleChild(newFiber: Fiber): Fiber {
     // This is simpler for the single child case. We only need to do a
     // placement for inserting new children.
+    // 在 首屏渲染 阶段 传进来的 fiber 是 wip fiber
+    // 所以这时候 alternate 是 null
+    // 需要给 fiber 标记 placement
     if (shouldTrackSideEffects && newFiber.alternate === null) {
       newFiber.flags |= Placement;
     }
@@ -1126,6 +1133,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     return created;
   }
 
+  // 根据 reactElement 创建 fiber
   function reconcileSingleElement(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
@@ -1186,6 +1194,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       child = child.sibling;
     }
 
+    // 判断 reactElement 是不是 fragment
     if (element.type === REACT_FRAGMENT_TYPE) {
       const created = createFiberFromFragment(
         element.props.children,
@@ -1298,6 +1307,7 @@ function ChildReconciler(shouldTrackSideEffects) {
           );
       }
 
+      // 多节点 ul -> 3*li
       if (isArray(newChild)) {
         return reconcileChildrenArray(
           returnFiber,
@@ -1319,6 +1329,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       throwOnInvalidObjectType(returnFiber, newChild);
     }
 
+    // 文本节点
     if (
       (typeof newChild === 'string' && newChild !== '') ||
       typeof newChild === 'number'

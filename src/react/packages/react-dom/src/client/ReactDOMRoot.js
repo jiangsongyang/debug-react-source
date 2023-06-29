@@ -89,9 +89,13 @@ function ReactDOMRoot(internalRoot: FiberRoot) {
   this._internalRoot = internalRoot;
 }
 
+// root.render 方法入口
 ReactDOMHydrationRoot.prototype.render = ReactDOMRoot.prototype.render = function(
   children: ReactNodeList,
 ): void {
+  console.log(`开始进入 render 方法`);
+
+  // 拿到 fiberRootNode
   const root = this._internalRoot;
   if (root === null) {
     throw new Error('Cannot update an unmounted root.');
@@ -131,6 +135,8 @@ ReactDOMHydrationRoot.prototype.render = ReactDOMRoot.prototype.render = functio
       }
     }
   }
+  // children 是 reactElement
+  // 开始消费 reactElement
   updateContainer(children, root, null, null);
 };
 
@@ -179,6 +185,7 @@ export function createRoot(
   let onRecoverableError = defaultOnRecoverableError;
   let transitionCallbacks = null;
 
+  // 判断参数是否合法
   if (options !== null && options !== undefined) {
     if (__DEV__) {
       if ((options: any).hydrate) {
@@ -221,6 +228,7 @@ export function createRoot(
     }
   }
 
+  // 创建 fiberRootNode
   const root = createContainer(
     container,
     ConcurrentRoot,
@@ -231,12 +239,17 @@ export function createRoot(
     onRecoverableError,
     transitionCallbacks,
   );
+  // 创建完 fiberRootNode
+
+  // 标记 一个属性 到 真实DOM 上
   markContainerAsRoot(root.current, container);
 
   const rootContainerElement: Document | Element | DocumentFragment =
     container.nodeType === COMMENT_NODE
       ? (container.parentNode: any)
       : container;
+
+  // 为真实DOM 添加事件监听
   listenToAllSupportedEvents(rootContainerElement);
 
   return new ReactDOMRoot(root);

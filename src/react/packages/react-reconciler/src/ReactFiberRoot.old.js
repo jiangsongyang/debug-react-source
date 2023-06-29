@@ -129,6 +129,7 @@ function FiberRootNode(
   }
 }
 
+// 创建 fiberRootNode
 export function createFiberRoot(
   containerInfo: any,
   tag: RootTag,
@@ -152,24 +153,33 @@ export function createFiberRoot(
     identifierPrefix,
     onRecoverableError,
   ): any);
+
+  /** 无用代码 当前版本未开启这个功能 */
   if (enableSuspenseCallback) {
     root.hydrationCallbacks = hydrationCallbacks;
   }
 
+  /** 无用代码 当前版本未开启这个功能 */
   if (enableTransitionTracing) {
     root.transitionCallbacks = transitionCallbacks;
   }
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
+  // 创建 根节点 hostRootFiber
   const uninitializedFiber = createHostRootFiber(
     tag,
     isStrictMode,
     concurrentUpdatesByDefaultOverride,
   );
+
+  // fiberRootNode.current 指向 hostRootFiber
   root.current = uninitializedFiber;
+  // hostRootFiber.stateNode 指向 fiberRootNode
   uninitializedFiber.stateNode = root;
 
+  // 环境变量决定这 cache 是否开启
+  // 当前调试项目不开启
   if (enableCache) {
     const initialCache = createCache();
     retainCache(initialCache);
@@ -199,9 +209,11 @@ export function createFiberRoot(
       transitions: null,
       pendingSuspenseBoundaries: null,
     };
+    // 给 hostRootFiber.memoizedState 赋值
     uninitializedFiber.memoizedState = initialState;
   }
 
+  // get hostRootFiber 挂上 udpateQueue
   initializeUpdateQueue(uninitializedFiber);
 
   return root;

@@ -292,6 +292,9 @@ export function reconcileChildren(
   renderLanes: Lanes,
 ) {
   if (current === null) {
+    /**
+     * rootFiber 在初始化时候会走到这里 执行一次 placement
+     */
     // If this is a fresh new component that hasn't been rendered yet, we
     // won't update its child set by applying minimal side-effects. Instead,
     // we will add them all to the child before it gets rendered. That means
@@ -1275,6 +1278,7 @@ function pushHostRootContext(workInProgress) {
   pushHostContainer(workInProgress, root.containerInfo);
 }
 
+// 消费 rootFiber 更新
 function updateHostRoot(current, workInProgress, renderLanes) {
   pushHostRootContext(workInProgress);
 
@@ -1290,6 +1294,7 @@ function updateHostRoot(current, workInProgress, renderLanes) {
 
   const nextState: RootState = workInProgress.memoizedState;
   const root: FiberRoot = workInProgress.stateNode;
+  // 下面这个方法没开启
   pushRootTransition(workInProgress, root, renderLanes);
 
   if (enableCache) {
@@ -1664,6 +1669,7 @@ function mountIndeterminateComponent(
     }
 
     setIsRendering(true);
+
     ReactCurrentOwner.current = workInProgress;
     value = renderWithHooks(
       null,
@@ -1686,6 +1692,7 @@ function mountIndeterminateComponent(
     );
     hasId = checkDidRenderIdHook();
   }
+  // 当前版本未开启
   if (enableSchedulingProfiler) {
     markComponentRenderStopped();
   }
@@ -1780,6 +1787,7 @@ function mountIndeterminateComponent(
     );
   } else {
     // Proceed under the assumption that this is a function component
+    // 更改 wip 的tag 为函数组件
     workInProgress.tag = FunctionComponent;
     if (__DEV__) {
       if (disableLegacyContext && Component.contextTypes) {
@@ -3682,6 +3690,7 @@ function attemptEarlyBailoutIfNoScheduledUpdate(
   return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
 }
 
+// beginWork 入口
 function beginWork(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -3777,6 +3786,7 @@ function beginWork(
   // move this assignment out of the common path and into each branch.
   workInProgress.lanes = NoLanes;
 
+  // beginwork 根据 tag 判断节点类型
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
       return mountIndeterminateComponent(

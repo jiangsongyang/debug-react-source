@@ -575,6 +575,7 @@ export function scheduleUpdateOnFiber(
 
     warnIfUpdatesNotWrappedWithActDEV(fiber);
 
+    // 当前版本未开启
     if (enableProfilerTimer && enableProfilerNestedUpdateScheduledHook) {
       if (
         (executionContext & CommitContext) !== NoContext &&
@@ -595,6 +596,7 @@ export function scheduleUpdateOnFiber(
       }
     }
 
+    // 当前版本未开启
     if (enableTransitionTracing) {
       const transition = ReactCurrentBatchConfig.transition;
       if (transition !== null) {
@@ -688,6 +690,7 @@ export function isUnsafeClassRenderPhaseUpdate(fiber: Fiber) {
 // of the existing task is the same as the priority of the next level that the
 // root has work on. This function is called on every update, and right before
 // exiting a task.
+// 调度 fiberRootNode
 function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
   const existingCallbackNode = root.callbackNode;
 
@@ -791,6 +794,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
     }
     newCallbackNode = null;
   } else {
+    // 根据 lane 计算调度优先级
     let schedulerPriorityLevel;
     switch (lanesToEventPriority(nextLanes)) {
       case DiscreteEventPriority:
@@ -809,8 +813,10 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
         schedulerPriorityLevel = NormalSchedulerPriority;
         break;
     }
+    // 将 调度 fiberRootNode 的方法 交给调度器调度
     newCallbackNode = scheduleCallback(
       schedulerPriorityLevel,
+      // 调度 根节点的入口方法
       performConcurrentWorkOnRoot.bind(null, root),
     );
   }
@@ -821,7 +827,9 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
 
 // This is the entry point for every concurrent task, i.e. anything that
 // goes through Scheduler.
+// 调度 根节点的入口方法
 function performConcurrentWorkOnRoot(root, didTimeout) {
+  console.log(`开始调度根节点`);
   if (enableProfilerTimer && enableProfilerNestedUpdatePhase) {
     resetNestedUpdateFlag();
   }
@@ -869,6 +877,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
   // TODO: We only check `didTimeout` defensively, to account for a Scheduler
   // bug we're still investigating. Once the bug in Scheduler is fixed,
   // we can remove this, since we track expiration ourselves.
+  // 返回 false 因为 disableSchedulerTimeoutInWorkLoop 未开启
   const shouldTimeSlice =
     !includesBlockingLane(root, lanes) &&
     !includesExpiredLane(root, lanes) &&
@@ -914,6 +923,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
       // to the main thread, if it was fast enough, or if it expired. We could
       // skip the consistency check in that case, too.
       const renderWasConcurrent = !includesBlockingLane(root, lanes);
+      // 这里拿到的是 rootFiber
       const finishedWork: Fiber = (root.current.alternate: any);
       if (
         renderWasConcurrent &&
@@ -921,6 +931,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
       ) {
         // A store was mutated in an interleaved event. Render again,
         // synchronously, to block further mutations.
+        // renderRootSync 调用的地方
         exitStatus = renderRootSync(root, lanes);
 
         // We need to check again if something threw
@@ -1016,6 +1027,7 @@ export function queueRecoverableErrors(errors: Array<CapturedValue<mixed>>) {
   }
 }
 
+// commit 阶段开始的地方
 function finishConcurrentRender(root, exitStatus, lanes) {
   switch (exitStatus) {
     case RootInProgress:
@@ -1468,9 +1480,16 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes): Fiber {
       interruptedWork = interruptedWork.return;
     }
   }
+
+  // 设置全局变量
   workInProgressRoot = root;
+
+  // 创建一个 workInProgress
+  // 在这里 初始化的 alternate
   const rootWorkInProgress = createWorkInProgress(root.current, null);
+
   workInProgress = rootWorkInProgress;
+
   workInProgressRootRenderLanes = subtreeRenderLanes = workInProgressRootIncludedLanes = lanes;
   workInProgressRootExitStatus = RootInProgress;
   workInProgressRootFatalError = null;
@@ -1658,11 +1677,16 @@ export function renderHasNotSuspendedYet(): boolean {
 function renderRootSync(root: FiberRoot, lanes: Lanes) {
   const prevExecutionContext = executionContext;
   executionContext |= RenderContext;
+
+  // 这里的 hook 调用会抛出异常
+  // 因为现在还没执行到 函数组件
+  // 现在在解析 root 现在属于在函数组件外调用 hook
   const prevDispatcher = pushDispatcher();
 
   // If the root or lanes have changed, throw out the existing stack
   // and prepare a fresh one. Otherwise we'll continue where we left off.
   if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
+    // 进不来
     if (enableUpdaterTracking) {
       if (isDevToolsPresent) {
         const memoizedUpdaters = root.memoizedUpdaters;
@@ -1680,6 +1704,9 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
     }
 
     workInProgressTransitions = getTransitionsForLanes(root, lanes);
+    // 准备工作
+    // 将 全局 workInProgress 指向 rootFiber
+    // 将 全局 workInProgressRoot 指向 fiberRootNode
     prepareFreshStack(root, lanes);
   }
 
@@ -1695,6 +1722,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
 
   do {
     try {
+      // 开始工作
       workLoopSync();
       break;
     } catch (thrownValue) {
@@ -1736,6 +1764,8 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
 function workLoopSync() {
   // Already timed out, so perform work without checking if we need to yield.
   while (workInProgress !== null) {
+    console.log(`当前工作的 wip 为 : `, workInProgress);
+    // 初始化的时候 workInProgress 是 rootFiber
     performUnitOfWork(workInProgress);
   }
 }
@@ -1835,6 +1865,8 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   const current = unitOfWork.alternate;
   setCurrentDebugFiberInDEV(unitOfWork);
 
+  // 递归 消费工作单元 ( fiber )
+  // workloop 开始递
   let next;
   if (enableProfilerTimer && (unitOfWork.mode & ProfileMode) !== NoMode) {
     startProfilerTimer(unitOfWork);
@@ -1846,8 +1878,10 @@ function performUnitOfWork(unitOfWork: Fiber): void {
 
   resetCurrentDebugFiberInDEV();
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
+  // dfs 结束后
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
+    // workloop 开始归
     completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
@@ -1856,6 +1890,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   ReactCurrentOwner.current = null;
 }
 
+// 构建离屏 DOM 树
 function completeUnitOfWork(unitOfWork: Fiber): void {
   // Attempt to complete the current unit of work, then move to the next
   // sibling. If there are no more siblings, return to the parent fiber.
@@ -1960,6 +1995,7 @@ function commitRoot(
   recoverableErrors: null | Array<CapturedValue<mixed>>,
   transitions: Array<Transition> | null,
 ) {
+  console.log(`commitRoot 执行`);
   // TODO: This no longer makes any sense. We already wrap the mutation and
   // layout phases. Should be able to remove.
   const previousUpdateLanePriority = getCurrentUpdatePriority();
@@ -3074,6 +3110,7 @@ export function restorePendingUpdaters(root: FiberRoot, lanes: Lanes): void {
 }
 
 const fakeActCallbackNode = {};
+// 让调度器调度任务
 function scheduleCallback(priorityLevel, callback) {
   if (__DEV__) {
     // If we're currently inside an `act` scope, bypass Scheduler and push to

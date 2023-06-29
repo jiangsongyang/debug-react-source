@@ -432,6 +432,7 @@ export function createHostRootFiber(
 ): Fiber {
   let mode;
   if (tag === ConcurrentRoot) {
+    // 设置并发更新模式
     mode = ConcurrentMode;
     if (isStrictMode === true) {
       mode |= StrictLegacyMode;
@@ -473,10 +474,12 @@ export function createFiberFromTypeAndProps(
   mode: TypeOfMode,
   lanes: Lanes,
 ): Fiber {
+  // 标记是未知 component 类型
   let fiberTag = IndeterminateComponent;
   // The resolved type is set if we know what the final type will be. I.e. it's not lazy.
   let resolvedType = type;
   if (typeof type === 'function') {
+    // 判断是不是类组件
     if (shouldConstruct(type)) {
       fiberTag = ClassComponent;
       if (__DEV__) {
@@ -487,7 +490,9 @@ export function createFiberFromTypeAndProps(
         resolvedType = resolveFunctionForHotReloading(resolvedType);
       }
     }
-  } else if (typeof type === 'string') {
+  }
+  // <div /> -> 'div'
+  else if (typeof type === 'string') {
     fiberTag = HostComponent;
   } else {
     getTag: switch (type) {
