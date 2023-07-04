@@ -886,6 +886,7 @@ function completeWork(
     case HostRoot: {
       const fiberRoot = (workInProgress.stateNode: FiberRoot);
 
+      // 未开启
       if (enableTransitionTracing) {
         const transitions = getWorkInProgressTransitions();
         // We set the Passive flag here because if there are new transitions,
@@ -1016,6 +1017,7 @@ function completeWork(
             markUpdate(workInProgress);
           }
         } else {
+          // 宿主环境实例 -- DOM 节点
           const instance = createInstance(
             type,
             newProps,

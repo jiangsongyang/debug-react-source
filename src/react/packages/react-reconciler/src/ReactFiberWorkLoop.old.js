@@ -957,6 +957,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
       // or, if something suspended, wait to commit it after a timeout.
       root.finishedWork = finishedWork;
       root.finishedLanes = lanes;
+      // commit 阶段开始
       finishConcurrentRender(root, exitStatus, lanes);
     }
   }
@@ -1866,7 +1867,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   setCurrentDebugFiberInDEV(unitOfWork);
 
   // 递归 消费工作单元 ( fiber )
-  // workloop 开始递
+  // workloop beginWork 开始递
   let next;
   if (enableProfilerTimer && (unitOfWork.mode & ProfileMode) !== NoMode) {
     startProfilerTimer(unitOfWork);
@@ -1881,7 +1882,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   // dfs 结束后
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
-    // workloop 开始归
+    // workloop completeWork 开始归
     completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
