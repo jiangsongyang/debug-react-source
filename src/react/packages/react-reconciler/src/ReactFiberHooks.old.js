@@ -144,6 +144,7 @@ if (__DEV__) {
   didWarnAboutMismatchedHooksForComponent = new Set();
 }
 
+// Hook 的类型
 export type Hook = {|
   memoizedState: any,
   baseState: any,
@@ -152,6 +153,7 @@ export type Hook = {|
   next: Hook | null,
 |};
 
+// Effect 的类型
 export type Effect = {|
   tag: HookFlags,
   create: () => (() => void) | void,
@@ -472,6 +474,7 @@ export function renderWithHooks<Props, SecondArg>(
         hookTypesUpdateIndexDev = -1;
       }
 
+      // 卸载 hook
       ReactCurrentDispatcher.current = __DEV__
         ? HooksDispatcherOnRerenderInDEV
         : HooksDispatcherOnRerender;

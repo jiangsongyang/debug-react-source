@@ -2140,6 +2140,7 @@ function commitRootImpl(
   // to check for the existence of `firstEffect` to satisfy Flow. I think the
   // only other reason this optimization exists is because it affects profiling.
   // Reconsider whether this is necessary.
+  // 检查 fiberTree 是否存在 flags
   const subtreeHasEffects =
     (finishedWork.subtreeFlags &
       (BeforeMutationMask | MutationMask | LayoutMask | PassiveMask)) !==
@@ -2161,6 +2162,7 @@ function commitRootImpl(
     // Reset this to null before calling lifecycles
     ReactCurrentOwner.current = null;
 
+    // commit 阶段的三个子阶段
     // The commit phase is broken into several sub-phases. We do a separate pass
     // of the effect list for each phase: all mutation effects come before all
     // layout effects, and so on.

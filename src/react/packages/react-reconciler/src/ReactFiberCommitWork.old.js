@@ -1496,6 +1496,7 @@ function getHostSibling(fiber: Fiber): ?Instance {
 }
 
 function commitPlacement(finishedWork: Fiber): void {
+  console.log(`commit placement`, finishedWork);
   if (!supportsMutation) {
     return;
   }
@@ -1536,11 +1537,13 @@ function commitPlacement(finishedWork: Fiber): void {
   }
 }
 
+// 真正执行插入的地方
 function insertOrAppendPlacementNodeIntoContainer(
   node: Fiber,
   before: ?Instance,
   parent: Container,
 ): void {
+
   const {tag} = node;
   const isHost = tag === HostComponent || tag === HostText;
   if (isHost) {
