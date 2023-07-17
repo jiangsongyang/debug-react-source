@@ -643,6 +643,7 @@ export function resetHooksAfterThrow(): void {
   localIdCounter = 0;
 }
 
+// mount 时 创建 hook 链表
 function mountWorkInProgressHook(): Hook {
   const hook: Hook = {
     memoizedState: null,
@@ -654,6 +655,7 @@ function mountWorkInProgressHook(): Hook {
     next: null,
   };
 
+  // mount && 第一个 hook
   if (workInProgressHook === null) {
     // This is the first hook in the list
     currentlyRenderingFiber.memoizedState = workInProgressHook = hook;
@@ -1535,6 +1537,7 @@ function mountState<S>(
     lastRenderedState: (initialState: any),
   };
   hook.queue = queue;
+  // dispatch 方法
   const dispatch: Dispatch<
     BasicStateAction<S>,
   > = (queue.dispatch = (dispatchSetState.bind(
