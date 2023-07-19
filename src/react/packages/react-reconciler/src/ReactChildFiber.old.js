@@ -321,6 +321,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     return existingChildren;
   }
 
+  // 复用一个 fiber
   function useFiber(fiber: Fiber, pendingProps: mixed): Fiber {
     // We currently set sibling to null and index to 0 here because it is easy
     // to forget to do before returning it. E.g. for the single child case.
@@ -1115,8 +1116,10 @@ function ChildReconciler(shouldTrackSideEffects) {
     textContent: string,
     lanes: Lanes,
   ): Fiber {
+    console.log(`处理 文本类型节点`);
     // There's no need to check for keys on text nodes since we don't have a
     // way to define them.
+    // <>123<> -> <>abc<>
     if (currentFirstChild !== null && currentFirstChild.tag === HostText) {
       // We already have an existing node so let's just update it and delete
       // the rest.
@@ -1127,6 +1130,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
     // The existing first child is not a text node so we need to create one
     // and delete the existing ones.
+    // <div> -> 123
     deleteRemainingChildren(returnFiber, currentFirstChild);
     const created = createFiberFromText(textContent, returnFiber.mode, lanes);
     created.return = returnFiber;

@@ -446,6 +446,7 @@ export function commitMount(
   }
 }
 
+// 提交更新 - commitUpdate
 export function commitUpdate(
   domElement: Instance,
   updatePayload: Array<mixed>,

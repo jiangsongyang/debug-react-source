@@ -1543,7 +1543,6 @@ function insertOrAppendPlacementNodeIntoContainer(
   before: ?Instance,
   parent: Container,
 ): void {
-
   const {tag} = node;
   const isHost = tag === HostComponent || tag === HostText;
   if (isHost) {
@@ -2083,11 +2082,13 @@ function recursivelyTraverseMutationEffects(
   setCurrentDebugFiberInDEV(prevDebugFiber);
 }
 
+// 提交更新 - commitMutationEffectsOnFiber
 function commitMutationEffectsOnFiber(
   finishedWork: Fiber,
   root: FiberRoot,
   lanes: Lanes,
 ) {
+  console.log(`commitMutationEffectsOnFiber`, finishedWork, root);
   const current = finishedWork.alternate;
   const flags = finishedWork.flags;
 
@@ -2225,9 +2226,11 @@ function commitMutationEffectsOnFiber(
       return;
     }
     case HostText: {
+      console.log(`update host text`);
       recursivelyTraverseMutationEffects(root, finishedWork, lanes);
       commitReconciliationEffects(finishedWork);
 
+      // 如果有更新的 flag
       if (flags & Update) {
         if (supportsMutation) {
           if (finishedWork.stateNode === null) {
