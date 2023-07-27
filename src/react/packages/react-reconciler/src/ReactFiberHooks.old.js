@@ -429,7 +429,6 @@ export function renderWithHooks<Props, SecondArg>(
       ReactCurrentDispatcher.current = HooksDispatcherOnMountInDEV;
     }
   } else {
-
     // 挂载 hooks
     ReactCurrentDispatcher.current =
       current === null || current.memoizedState === null
@@ -673,14 +672,19 @@ function updateWorkInProgressHook(): Hook {
   // use as a base. When we reach the end of the base list, we must switch to
   // the dispatcher used for mounts.
   let nextCurrentHook: null | Hook;
+  // 这是 fc update 时的第一个 hook
   if (currentHook === null) {
+    // current fiber
     const current = currentlyRenderingFiber.alternate;
     if (current !== null) {
       nextCurrentHook = current.memoizedState;
     } else {
+      // mount 阶段 currentFiber 才可能是 null
+      // 属于 边缘case
       nextCurrentHook = null;
     }
   } else {
+    // 后续的 hook
     nextCurrentHook = currentHook.next;
   }
 
@@ -701,6 +705,7 @@ function updateWorkInProgressHook(): Hook {
     // Clone from the current hook.
 
     if (nextCurrentHook === null) {
+      // 比上次渲染时的 hook 多
       throw new Error('Rendered more hooks than during the previous render.');
     }
 
