@@ -331,6 +331,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     return clone;
   }
 
+  // 判断当前 fiber 是否需要移动
   function placeChild(
     newFiber: Fiber,
     lastPlacedIndex: number,
@@ -345,6 +346,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
     const current = newFiber.alternate;
     if (current !== null) {
+      // update
       const oldIndex = current.index;
       if (oldIndex < lastPlacedIndex) {
         // This is a move.
@@ -355,6 +357,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         return oldIndex;
       }
     } else {
+      // mount
       // This is an insertion.
       newFiber.flags |= Placement;
       return lastPlacedIndex;
@@ -636,6 +639,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     newChild: any,
     lanes: Lanes,
   ): Fiber | null {
+    // host text
     if (
       (typeof newChild === 'string' && newChild !== '') ||
       typeof newChild === 'number'
@@ -741,6 +745,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     return knownKeys;
   }
 
+  // 同级多节点 diff
   function reconcileChildrenArray(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
@@ -779,6 +784,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     let previousNewFiber: Fiber | null = null;
 
     let oldFiber = currentFirstChild;
+    // 最后一个可复用节点在 current 中的 index
     let lastPlacedIndex = 0;
     let newIdx = 0;
     let nextOldFiber = null;
@@ -895,6 +901,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       }
     }
 
+    // 统一标记删除
     if (shouldTrackSideEffects) {
       // Any existing children that weren't consumed above were deleted. We need
       // to add them to the deletion list.

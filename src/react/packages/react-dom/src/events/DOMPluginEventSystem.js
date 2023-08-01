@@ -383,6 +383,7 @@ const listeningMarker =
     .toString(36)
     .slice(2);
 
+// REACT 事件系统入口
 export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
   if (!(rootContainerElement: any)[listeningMarker]) {
     (rootContainerElement: any)[listeningMarker] = true;

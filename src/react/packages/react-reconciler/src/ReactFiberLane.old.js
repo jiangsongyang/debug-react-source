@@ -128,6 +128,7 @@ export const NoTimestamp = -1;
 let nextTransitionLane: Lane = TransitionLane1;
 let nextRetryLane: Lane = RetryLane1;
 
+// 获取当前更新最高的优先级的 lane
 function getHighestPriorityLanes(lanes: Lanes | Lane): Lanes {
   switch (getHighestPriorityLane(lanes)) {
     case SyncLane:
@@ -695,7 +696,7 @@ export function markRootEntangled(root: FiberRoot, entangledLanes: Lanes) {
 }
 
 export function getBumpedLaneForHydration(
-  root: FiberRoot,
+k root: FiberRoot,
   renderLanes: Lanes,
 ): Lane {
   const renderLane = getHighestPriorityLane(renderLanes);

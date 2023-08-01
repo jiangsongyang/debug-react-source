@@ -1457,6 +1457,7 @@ function getHostSibling(fiber: Fiber): ?Instance {
   let node: Fiber = fiber;
   siblings: while (true) {
     // If we didn't find anything, let's try the next sibling.
+    // 向上找
     while (node.sibling === null) {
       if (node.return === null || isHostParent(node.return)) {
         // If we pop out of the root or hit the parent the fiber we are the
@@ -1467,13 +1468,16 @@ function getHostSibling(fiber: Fiber): ?Instance {
     }
     node.sibling.return = node.return;
     node = node.sibling;
+
     while (
       node.tag !== HostComponent &&
       node.tag !== HostText &&
       node.tag !== DehydratedFragment
     ) {
+      // 向下遍历 找子孙节点
       // If it is not host node and, we might have a host node inside it.
       // Try to search down until we find one.
+      // 排除掉不稳定的节点
       if (node.flags & Placement) {
         // If we don't have a child, try the siblings instead.
         continue siblings;
@@ -1515,9 +1519,11 @@ function commitPlacement(finishedWork: Fiber): void {
         parentFiber.flags &= ~ContentReset;
       }
 
+      // 查找
       const before = getHostSibling(finishedWork);
       // We only have the top Fiber that was inserted but we need to recurse down its
       // children to find all the terminal nodes.
+      // 如果有 before 就是移动 没before 就是插入
       insertOrAppendPlacementNode(finishedWork, before, parent);
       break;
     }
