@@ -20,9 +20,11 @@ let syncQueue: Array<SchedulerCallback> | null = null;
 let includesLegacySyncCallbacks: boolean = false;
 let isFlushingSyncQueue: boolean = false;
 
+// 入队
 export function scheduleSyncCallback(callback: SchedulerCallback) {
   // Push this callback into an internal queue. We'll flush these either in
   // the next tick, or earlier if something calls `flushSyncCallbackQueue`.
+  // 第一个 callback
   if (syncQueue === null) {
     syncQueue = [callback];
   } else {
@@ -48,7 +50,9 @@ export function flushSyncCallbacksOnlyInLegacyMode() {
   }
 }
 
+// 执行
 export function flushSyncCallbacks() {
+  // 在执行的时候 会多次进去 但是因为有全局开关 所以只会循环一次
   if (!isFlushingSyncQueue && syncQueue !== null) {
     // Prevent re-entrance.
     isFlushingSyncQueue = true;
